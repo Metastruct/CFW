@@ -1,5 +1,3 @@
-local CFW = CFW
-
 local function floodFill(source, sinkIndex)
     local closed       = {[source:EntIndex()] = true}
     local closedCount  = 0

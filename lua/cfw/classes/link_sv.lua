@@ -2,14 +2,10 @@
 -- These are used to keep track of the number of connections between two entities
 -- In graph theory these are edges
 
-local CFW = CFW
+CFW.Classes.Link = {}
 
-local EntityLinks = setmetatable({}, {__mode = "k"})
-
-CFW.EntityLinks = EntityLinks
-
-local CLASS = {}
-CFW.Classes.Link = CLASS
+local EntityLinks = {}
+CFW.EntityLinks   = EntityLinks
 
 function CFW.createLink(a, b)
     local indexA, indexB = a:EntIndex(), b:EntIndex()
@@ -25,19 +21,22 @@ function CFW.createLink(a, b)
     }
 
     local linksA = EntityLinks[a] or {}
-    EntityLinks[a] = linksA
     local linksB = EntityLinks[b] or {}
+
+    EntityLinks[a] = linksA
     EntityLinks[b] = linksB
 
     linksA[indexB] = link
     linksB[indexA] = link
 
-    setmetatable(link, CLASS)
+    setmetatable(link, CFW.Classes.Link)
 
     return link:Init()
 end
 
 do -- Class def
+    local CLASS = CFW.Classes.Link
+
     CLASS.__index = CLASS -- why?
 
     function CLASS:Init()
@@ -60,12 +59,31 @@ do -- Class def
         local contraptionPopped = false
         local entA, entB        = self.entA, self.entB
         local indexA, indexB    = self.indexA, self.indexB
+        local linksA, linksB    = EntityLinks[entA], EntityLinks[entB]
+        local emptyA, emptyB    = true, true
 
-        if IsValid(entA) then
-            local linksA = EntityLinks[entA]
+        if linksA then
             linksA[indexB] = nil
 
-            if not next(linksA) then
+            if next(linksA) then
+                emptyA = false
+            else
+                EntityLinks[entA] = nil
+            end
+        end
+
+        if linksB then
+            linksB[indexA] = nil
+
+            if next(linksB) then
+                emptyB = false
+            else
+                EntityLinks[entB] = nil
+            end
+        end
+
+        if IsValid(entA) then
+            if emptyA then
                 -- It's important that the entity is removed from the family first, then the contraption in that order
                 entA:SetFamily(nil)
                 entA:CFW_GetContraption():Sub(entA)
@@ -77,10 +95,7 @@ do -- Class def
         end
 
         if IsValid(entB) then
-            local linksB = EntityLinks[entB]
-            linksB[indexA] = nil
-
-            if not next(linksB) then
+            if emptyB then
                 entB:SetFamily(nil)
                 entB:CFW_GetContraption():Sub(entB)
 

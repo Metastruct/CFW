@@ -1,15 +1,10 @@
 -- Families are collections of parented entities, you know, parents... children...
 
-local CFW = CFW
+CFW.Classes.Family = {}
+CFW.Families       = {}
 
-local Families       = {}
-local EntityFamilies = setmetatable({}, {__mode = "k"})
-
-CFW.Families       = Families
-CFW.EntityFamilies = EntityFamilies
-
-local CLASS = {}
-CFW.Classes.Family = CLASS
+local EntityFamilies = {}
+CFW.EntityFamilies   = EntityFamilies
 
 function CFW.Classes.Family.create(ancestor)
     local fam = {
@@ -22,7 +17,7 @@ function CFW.Classes.Family.create(ancestor)
         created     = CurTime(),
     }
 
-    setmetatable(fam, CLASS)
+    setmetatable(fam, CFW.Classes.Family)
 
     fam:Init()
     fam:Add(ancestor, true)
@@ -31,10 +26,12 @@ function CFW.Classes.Family.create(ancestor)
 end
 
 do -- Class def
+    local CLASS = CFW.Classes.Family
+
     CLASS.__index = CLASS
 
     function CLASS:Init()
-        Families[self] = true
+        CFW.Families[self] = true
 
         local con = self.ancestor:CFW_GetContraption()
         if con then con.families[self] = true end
@@ -54,7 +51,7 @@ do -- Class def
 
         hook.Run("cfw.family.deleted", self)
 
-        Families[self] = nil
+        CFW.Families[self] = nil
     end
 
     function CLASS:Add(entity, isAncestor)
@@ -130,7 +127,7 @@ do -- Class def
         local Tracked = self.entsbyclass[ClassName]
         if not Tracked then return false end
 
-        return next(Tracked) ~= nil
+        return next(Tracked) ~= nil -- I don't *THINK* we would ever get NULL here...
     end
 end
 

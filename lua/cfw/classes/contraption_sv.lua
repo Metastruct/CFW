@@ -1,15 +1,10 @@
 -- Contraptions are an object to refer to a collection of connected entities
 
-local CFW = CFW
+CFW.Contraptions        = {}
+CFW.Classes.Contraption = {}
 
-local Contraptions       = {}
-local EntityContraptions = setmetatable({}, {__mode = "k"})
-
-CFW.Contraptions         = Contraptions
+local EntityContraptions = {}
 CFW.EntityContraptions   = EntityContraptions
-
-local CLASS = {}
-CFW.Classes.Contraption = CLASS
 
 function CFW.createContraption()
     local con  = {
@@ -21,7 +16,7 @@ function CFW.createContraption()
         created     = CurTime(),
     }
 
-    setmetatable(con, CLASS)
+    setmetatable(con, CFW.Classes.Contraption)
 
     con:Init()
 
@@ -31,35 +26,18 @@ end
 do -- Contraption getters and setters
     local ENT = FindMetaTable("Entity")
 
-    if file.Exists("cfg/cfw_legacy_mode.cfg", "GAME") then
-        CFW.LEGACY_MODE = true
-    end
-
     function ENT:CFW_GetContraption()
         return EntityContraptions[self]
     end
-
-    if os.time() < 1791417621 or CFW.LEGACY_MODE then
-        local nextWarning
-
-        function ENT:GetContraption()
-            if not CFW.LEGACY_MODE then
-                local t = os.time()
-                if not nextWarning or t >= nextWarning then
-                    nextWarning = t + 60
-                    ErrorNoHaltWithStack("GetContraption is deprecated, use CFW_GetContraption instead. GetContraption will be removed on October 8th 2026.")
-                end
-            end
-            return self:CFW_GetContraption()
-        end
-    end
 end
 
-do
+do -- Class def
+    local CLASS = CFW.Classes.Contraption
+
     CLASS.__index = CLASS
 
     function CLASS:Init()
-        Contraptions[self] = true
+        CFW.Contraptions[self] = true
         hook.Run("cfw.contraption.created", self)
     end
 
@@ -73,8 +51,8 @@ do
 
     function CLASS:Add(ent)
         EntityContraptions[ent] = self
-        self.ents[ent]   = true
-        self.count       = self.count + 1
+        self.ents[ent]          = true
+        self.count              = self.count + 1
 
         local className = ent:GetClass()
         self.entsbyclass[className] = self.entsbyclass[className] or {}
@@ -85,8 +63,8 @@ do
 
     function CLASS:Sub(ent)
         EntityContraptions[ent] = nil
-        self.ents[ent]   = nil
-        self.count       = self.count - 1
+        self.ents[ent]          = nil
+        self.count              = self.count - 1
 
         local className   = ent:GetClass()
         local entsByClass = self.entsbyclass[className]
@@ -115,7 +93,7 @@ do
             hook.Run("cfw.contraption.removed", self)
         end
 
-        Contraptions[self] = nil
+        CFW.Contraptions[self] = nil
     end
 
     function CLASS:Defuse()
@@ -140,6 +118,6 @@ do
         local Tracked = self.entsbyclass[ClassName]
         if not Tracked then return false end
 
-        return next(Tracked) ~= nil
+        return next(Tracked) ~= nil -- I don't *THINK* we would ever get NULL here...
     end
 end

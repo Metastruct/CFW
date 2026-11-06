@@ -41,7 +41,7 @@ end
 function TOOL:Think()
 	local ent	= self.Entity
 	if not IsValid(ent) then return end
-	local links = CFW and CFW.EntityLinks and CFW.EntityLinks[ent]
+	local links	= CFW and CFW.EntityLinks and CFW.EntityLinks[ent]
 
 	if not links then return end
 
@@ -61,8 +61,8 @@ function TOOL:Think()
 
 		if not Rendered[entB] then
 			debugoverlay.Text(entB:GetPos(),"B",tick,false)
-
 			Rendered[entB] = true
 		end
 	end
 end
+
