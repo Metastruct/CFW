@@ -70,11 +70,8 @@ end
 function CFW.disconnect(entA, indexB)
     if entA:EntIndex() == indexB then return end -- Should not happen normally, but ragdolls allow you to constrain to other bones on the same ragdoll, and it is the same entity
 
-    -- Don't soft error because if _links isn't present then it's a deeper CFW issue, nothing without a _links table should be able to reach this point at all
     local links = CFW.EntityLinks[entA]
-    if not links then ErrorNoHaltWithStack("Contraption Framework Error: Entity had no links. This error generally indicates a deeper problem with CFW.") end
-
-    local link = links[indexB]
+    local link  = links and links[indexB]
 
     if not link then return end -- There's nothing to disconnect here
 
