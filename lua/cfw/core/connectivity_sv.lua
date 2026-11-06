@@ -8,16 +8,21 @@ local function floodFill(source, sinkIndex)
     while next(open) do
         local entIndex = next(open) -- entIndex, entLink
 
-        open[entIndex]   = nil
-        closed[entIndex] = true
+        open[entIndex] = nil
 
-        closedCount = closedCount + 1
+        local neighbors = CFW.EntityLinks[Entity(entIndex)]
 
-        if entIndex == sinkIndex then return true, closed end
+        if neighbors then
+            closed[entIndex] = true
 
-        for neighborIndex in pairs(CFW.EntityLinks[Entity(entIndex)]) do -- neighborIndex, neighborLink
-            if not closed[neighborIndex] then
-                open[neighborIndex] = true
+            closedCount = closedCount + 1
+
+            if entIndex == sinkIndex then return true, closed end
+
+            for neighborIndex in pairs(neighbors) do -- neighborIndex, neighborLink
+                if not closed[neighborIndex] then
+                    open[neighborIndex] = true
+                end
             end
         end
     end
